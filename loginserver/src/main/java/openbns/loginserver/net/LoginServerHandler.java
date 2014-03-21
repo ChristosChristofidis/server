@@ -4,6 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import openbns.commons.net.codec.sts.DefaultStsRequest;
 import openbns.commons.net.codec.sts.LastStsContent;
+import openbns.loginserver.crypt.BNSKeyExchange;
+import openbns.loginserver.model.Account;
 import openbns.loginserver.net.client.AbstractRequestPacket;
 import openbns.loginserver.net.client.RequestPacketHandler;
 import org.apache.commons.logging.Log;
@@ -21,7 +23,9 @@ public class LoginServerHandler extends ChannelInboundHandlerAdapter
   private static final RequestPacketHandler packetHandler = RequestPacketHandler.getInstance();
 
   private String lastURI;
-  private Session session;
+  private BNSKeyExchange keyExchange;
+  private Account account;
+  private int sessionId;
 
   // TODO: REFACTOR ALL. ITS ONLY FOR TESTING
   @Override
@@ -35,7 +39,7 @@ public class LoginServerHandler extends ChannelInboundHandlerAdapter
 
       String s = req.headers().get( "s" );
       if( s != null )
-        session.setSessionId( Integer.parseInt( s ) );
+        sessionId = Integer.parseInt( s );
     }
     else if( msg instanceof LastStsContent )
     {
@@ -66,13 +70,32 @@ public class LoginServerHandler extends ChannelInboundHandlerAdapter
   public void channelRegistered( ChannelHandlerContext ctx ) throws Exception
   {
     log.debug( "Accepted new channel" );
-    session = new Session();
-    session.init();
-    log.debug( "Generated session: " + session );
+    keyExchange = new BNSKeyExchange();
+    keyExchange.generatePrivateKey();
   }
 
-  public Session getSession()
+  public int getSessionId()
   {
-    return session;
+    return sessionId;
+  }
+
+  public void setSessionId( int sessionId )
+  {
+    this.sessionId = sessionId;
+  }
+
+  public BNSKeyExchange getKeyExchange()
+  {
+    return keyExchange;
+  }
+
+  public Account getAccount()
+  {
+    return account;
+  }
+
+  public void setAccount( Account account )
+  {
+    this.account = account;
   }
 }

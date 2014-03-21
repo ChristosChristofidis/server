@@ -13,19 +13,33 @@ import java.security.NoSuchAlgorithmException;
  */
 public class HashHelper
 {
-  public static byte[] loginHash( String login ) throws NoSuchAlgorithmException
+  public static byte[] loginHash( String login )
   {
-    login = login + Config.LOGIN_POSTFIX;
-    MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
-    digest.update( login.getBytes() );
-    return digest.digest();
+    try
+    {
+      login = login + Config.LOGIN_POSTFIX;
+      MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
+      digest.update( login.getBytes() );
+      return digest.digest();
+    }
+    catch( NoSuchAlgorithmException e )
+    {
+      return null;
+    }
   }
 
-  public static byte[] passwordHash( String login, String password ) throws NoSuchAlgorithmException
+  public static byte[] passwordHash( String login, String password )
   {
-    String full_name = String.format( "%s%s:%s", login, Config.LOGIN_POSTFIX, password );
-    MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
-    digest.update( full_name.getBytes() );
-    return digest.digest();
+    try
+    {
+      String full_name = String.format( "%s%s:%s", login, Config.LOGIN_POSTFIX, password );
+      MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
+      digest.update( full_name.getBytes() );
+      return digest.digest();
+    }
+    catch( NoSuchAlgorithmException e )
+    {
+      return null;
+    }
   }
 }

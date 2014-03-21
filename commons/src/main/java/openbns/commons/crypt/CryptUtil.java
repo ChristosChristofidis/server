@@ -15,6 +15,16 @@ public class CryptUtil
 {
   private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
 
+  public static byte[] hexStringToByteArray( String s )
+  {
+    int len = s.length();
+    byte[] data = new byte[ len / 2 ];
+    for( int i = 0; i < len; i += 2 )
+      data[ i / 2 ] = (byte) ((Character.digit( s.charAt( i ), 16 ) << 4) + Character.digit( s.charAt( i + 1 ), 16 ));
+
+    return data;
+  }
+
   public static String hexToString( byte[] bytes )
   {
     char[] hexChars = new char[ bytes.length * 2 ];
@@ -39,18 +49,34 @@ public class CryptUtil
     return array;
   }
 
-  public static String sha256( byte[] data ) throws NoSuchAlgorithmException
+  public static String sha256( byte[] data )
   {
-    MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
-    digest.update( data );
-    return CryptUtil.hexToString( digest.digest() );
+    try
+    {
+      MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
+      digest.update( data );
+      return CryptUtil.hexToString( digest.digest() );
+    }
+    catch( NoSuchAlgorithmException e )
+    {
+      e.printStackTrace();
+    }
+    return null;
   }
 
-  public static byte[] sha256bytes( byte[] data ) throws NoSuchAlgorithmException
+  public static byte[] sha256bytes( byte[] data )
   {
-    MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
-    digest.update( data );
-    return digest.digest();
+    try
+    {
+      MessageDigest digest = MessageDigest.getInstance( "SHA-256" );
+      digest.update( data );
+      return digest.digest();
+    }
+    catch( NoSuchAlgorithmException e )
+    {
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public static String base64( byte[] data )

@@ -1,6 +1,7 @@
 package openbns.loginserver.net.client.impl;
 
 import io.netty.buffer.ByteBufInputStream;
+import openbns.commons.crypt.AbstractKeyExchange;
 import openbns.commons.crypt.CryptUtil;
 import openbns.commons.xml.StsXStream;
 import openbns.loginserver.net.client.AbstractRequestPacket;
@@ -10,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,19 +49,10 @@ public class RequestKeyData extends AbstractRequestPacket
 
     try
     {
-      byte[][] result = handler.getSession().generateServerKey( exchangeKey );
+      handler.getKeyExchange().generateKey( AbstractKeyExchange.Mode.SERVER, exchangeKey );
+      String hash = handler.getKeyExchange().getAuthentication();
 
-      String authentication = CryptUtil.base64( result[ 0 ] ) + "," + CryptUtil.base64( result[ 1 ] );
-      String[] args = authentication.split( "," );
-
-      String a1 = new String( checkHash );
-
-      if( a1.equals( args[ 0 ] ) )
-      {
-        System.out.println( "Aaaaaaaaaagdg" );
-      }
-
-      System.out.println( Arrays.deepToString( result ) );
+      System.out.println( hash );
     }
     catch( Exception e )
     {

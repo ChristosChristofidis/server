@@ -2,21 +2,20 @@ package openbns.loginserver.net.client.impl;
 
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
+import openbns.commons.crypt.AbstractKeyExchange;
+import openbns.commons.crypt.CryptUtil;
 import openbns.commons.net.codec.sts.DefaultLastStsContent;
 import openbns.commons.net.codec.sts.DefaultStsResponse;
 import openbns.commons.net.codec.sts.StsHeaders;
 import openbns.commons.net.codec.sts.StsResponseStatus;
-import openbns.commons.crypt.CryptUtil;
 import openbns.commons.xml.StsXStream;
 import openbns.loginserver.dao.AccountDAO;
 import openbns.loginserver.model.Account;
-import openbns.loginserver.net.Session;
 import openbns.loginserver.net.client.AbstractRequestPacket;
 import openbns.loginserver.net.client.dto.LoginStartDTO;
 import openbns.loginserver.net.server.dto.ReplyErrorDTO;
 import openbns.loginserver.net.server.dto.ReplyKeyData;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -42,17 +41,15 @@ public class RequestLoginStart extends AbstractRequestPacket
   @Override
   public void execute()
   {
-    Session session = getHandler().getSession();
     try
     {
       Account account = AccountDAO.getInstance().getByLogin( loginStart.getLoginName() );
-      session.setAccount( account );
+      getHandler().setAccount( account );
+      getHandler().getKeyExchange().setUser( account.getLogin() );
+      getHandler().getKeyExchange().setPasswordHash( account.getPassword() );
 
-      BigInteger key = session.generateServerExchangeKey();
-      BigInteger sessionKey = session.getSessionKey();
-
-      byte[] bk = CryptUtil.bigIntegerToByteArray( key );
-      byte[] sk = CryptUtil.bigIntegerToByteArray( sessionKey );
+      byte[] bk = getHandler().getKeyExchange().getKeyExchange( AbstractKeyExchange.Mode.SERVER );
+      byte[] sk = getHandler().getKeyExchange().getSessionBytes();
 
       ByteBuffer buffer = ByteBuffer.allocate( bk.length + sk.length + 8 );
       buffer.order( ByteOrder.LITTLE_ENDIAN );
@@ -75,7 +72,7 @@ public class RequestLoginStart extends AbstractRequestPacket
 
       DefaultStsResponse resp = new DefaultStsResponse( StsResponseStatus.OK );
       resp.headers().add( StsHeaders.Names.CONTENT_LENGTH, b.length );
-      resp.headers().add( StsHeaders.Names.SESSION_NUMBER, session.getSessionId() + "R" );
+      resp.headers().add( StsHeaders.Names.SESSION_NUMBER, getHandler().getSessionId() + "R" );
 
       channel.writeAndFlush( resp );
       channel.writeAndFlush( new DefaultLastStsContent( Unpooled.wrappedBuffer( b ) ) );
@@ -94,7 +91,7 @@ public class RequestLoginStart extends AbstractRequestPacket
 
       DefaultStsResponse resp = new DefaultStsResponse( StsResponseStatus.NOT_ONLINE );
       resp.headers().add( StsHeaders.Names.CONTENT_LENGTH, b.length );
-      resp.headers().add( StsHeaders.Names.SESSION_NUMBER, session.getSessionId() + "R" );
+      resp.headers().add( StsHeaders.Names.SESSION_NUMBER, getHandler().getSessionId() + "R" );
 
       channel.writeAndFlush( resp );
       channel.writeAndFlush( new DefaultLastStsContent( Unpooled.wrappedBuffer( b ) ) );
