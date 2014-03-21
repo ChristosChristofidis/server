@@ -1,4 +1,4 @@
-import openbns.commons.util.CryptUtil;
+import openbns.commons.crypt.CryptUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;

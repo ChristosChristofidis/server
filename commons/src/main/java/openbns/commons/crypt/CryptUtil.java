@@ -1,4 +1,4 @@
-package openbns.commons.util;
+package openbns.commons.crypt;
 
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;

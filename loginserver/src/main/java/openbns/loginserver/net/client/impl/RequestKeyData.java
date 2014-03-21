@@ -1,7 +1,7 @@
 package openbns.loginserver.net.client.impl;
 
 import io.netty.buffer.ByteBufInputStream;
-import openbns.commons.util.CryptUtil;
+import openbns.commons.crypt.CryptUtil;
 import openbns.commons.xml.StsXStream;
 import openbns.loginserver.net.client.AbstractRequestPacket;
 import openbns.loginserver.net.client.dto.KeyDataDTO;

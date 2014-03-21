@@ -6,7 +6,7 @@ import openbns.commons.net.codec.sts.DefaultLastStsContent;
 import openbns.commons.net.codec.sts.DefaultStsResponse;
 import openbns.commons.net.codec.sts.StsHeaders;
 import openbns.commons.net.codec.sts.StsResponseStatus;
-import openbns.commons.util.CryptUtil;
+import openbns.commons.crypt.CryptUtil;
 import openbns.commons.xml.StsXStream;
 import openbns.loginserver.dao.AccountDAO;
 import openbns.loginserver.model.Account;

@@ -9,7 +9,8 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import static openbns.commons.util.CryptUtil.*;
+import static openbns.commons.crypt.CryptUtil.*;
+import static openbns.commons.crypt.CryptUtil.bigIntegerToByteArray;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,14 +62,18 @@ public class Session
 
   public byte[][] generateServerKey( byte[] array ) throws NoSuchAlgorithmException, IOException
   {
-    byte[] userNameHash = HashHelper.loginHash( account.getLogin() );
+    BigInteger bi = new BigInteger( array );
     byte[] passwordHash = account.getPassword();
+    byte[] userNameHash = HashHelper.loginHash( account.getLogin() );
 
-    BigInteger hash1 = keyManager.generateAIIKey( array, bigIntegerToByteArray( serverExchangeKey ) );
+    BigInteger hash1 = keyManager.generateAIIKey( bigIntegerToByteArray( bi ), bigIntegerToByteArray( serverExchangeKey ) );
     BigInteger hash2 = keyManager.generateAIIKey( bigIntegerToByteArray( sessionKey ), passwordHash );
 
-    BigInteger v27 = new BigInteger( hexToString( array ), 16 );
-    BigInteger v21 = exchangeKey.modPow( hash1.multiply( hash2 ), KeyManager.N ).multiply( v27.modPow( privateKey, KeyManager.N ) ).mod( KeyManager.N );
+    BigInteger v27 = new BigInteger( bigIntegerToByteArray( bi ) );
+    BigInteger r1 = exchangeKey.modPow( hash1.multiply( hash2 ), KeyManager.N );
+    BigInteger r2 = v27.modPow( privateKey, KeyManager.N );
+
+    BigInteger v21 = (r1.multiply( r2 )).mod( KeyManager.N );
 
     byte[] rootKey = keyManager.generateEncryptionKeyRoot( bigIntegerToByteArray( v21 ) );
 

@@ -1,6 +1,6 @@
 package openbns.loginserver.crypt;
 
-import openbns.commons.util.CryptUtil;
+import openbns.commons.crypt.CryptUtil;
 
 import java.io.*;
 import java.math.BigInteger;
