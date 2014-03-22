@@ -48,7 +48,7 @@ public class BNSKeyExchange extends AbstractKeyExchange
     {
       exchangeKey = two.modPow( privateKey, N );
       usernameHash = HashHelper.loginHash( user );
-      BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToByteArray( session ), passwordHash );
+      BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToArray( session ), passwordHash );
       BigInteger v25 = two.modPow( hash2, N );
       v25 = v25.multiply( P ).mod( N );
       exchangeKeyServer = exchangeKey.add( v25 ).mod( N );
@@ -58,10 +58,10 @@ public class BNSKeyExchange extends AbstractKeyExchange
 
   public byte[][] generateKeyClient( BigInteger exchangeKey )
   {
-    BigInteger hash1 = keyManager.generateAIIKey( CryptUtil.bigIntegerToByteArray( getKeyExchange() ), CryptUtil.bigIntegerToByteArray( exchangeKey ) );
-    BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToByteArray( session ), passwordHash );
+    BigInteger hash1 = keyManager.generateAIIKey( CryptUtil.bigIntegerToArray( getKeyExchange() ), CryptUtil.bigIntegerToArray( exchangeKey ) );
+    BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToArray( session ), passwordHash );
 
-    BigInteger v27 = new BigInteger( CryptUtil.bigIntegerToByteArray( exchangeKey ) );
+    BigInteger v27 = new BigInteger( CryptUtil.bigIntegerToArray( exchangeKey ) );
     BigInteger v25 = two.modPow( hash2, N );
     v25 = v25.multiply( P ).mod( N );
 
@@ -72,9 +72,9 @@ public class BNSKeyExchange extends AbstractKeyExchange
     BigInteger v24 = ((hash1.multiply( hash2 )).add( privateKey )).mod( N );
     BigInteger v21 = v27.modPow( v24, N );
 
-    key = keyManager.generateEncryptionKeyRoot( CryptUtil.bigIntegerToByteArray( v21 ) );
-    byte[] chash1 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( staticKey, HashHelper.loginHash( user ), CryptUtil.bigIntegerToByteArray( session ), CryptUtil.bigIntegerToByteArray( getKeyExchange() ), CryptUtil.bigIntegerToByteArray( exchangeKey ), key ) );
-    byte[] chash2 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( CryptUtil.bigIntegerToByteArray( getKeyExchange() ), chash1, key ) );
+    key = keyManager.generateEncryptionKeyRoot( CryptUtil.bigIntegerToArray( v21 ) );
+    byte[] chash1 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( staticKey, HashHelper.loginHash( user ), CryptUtil.bigIntegerToArray( session ), CryptUtil.bigIntegerToArray( getKeyExchange() ), CryptUtil.bigIntegerToArray( exchangeKey ), key ) );
+    byte[] chash2 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( CryptUtil.bigIntegerToArray( getKeyExchange() ), chash1, key ) );
     key = keyManager.generate256BytesKey( key );
 
     return new byte[][] { chash1, chash2 };
@@ -82,18 +82,18 @@ public class BNSKeyExchange extends AbstractKeyExchange
 
   public byte[][] generateKeyServer( BigInteger exchangeKey )
   {
-    BigInteger hash1 = keyManager.generateAIIKey( CryptUtil.bigIntegerToByteArray( exchangeKey ), CryptUtil.bigIntegerToByteArray( getKeyExchangeServer() ) );
+    BigInteger hash1 = keyManager.generateAIIKey( CryptUtil.bigIntegerToArray( exchangeKey ), CryptUtil.bigIntegerToArray( getKeyExchangeServer() ) );
 
-    BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToByteArray( session ), passwordHash );
+    BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToArray( session ), passwordHash );
 
-    BigInteger v27 = new BigInteger( CryptUtil.bigIntegerToByteArray( exchangeKey ) );
+    BigInteger v27 = new BigInteger( CryptUtil.bigIntegerToArray( exchangeKey ) );
 
     //BigInteger v21 = (this.GetKeyExchange().modPow((hash1 * hash2), N) * v27.modPow(privateKey, N)) % N;
     BigInteger v21 = ((getKeyExchange().modPow( (hash1.multiply( hash2 )), N )).multiply( v27.modPow( privateKey, N ) )).mod( N );
-    key = keyManager.generateEncryptionKeyRoot( CryptUtil.bigIntegerToByteArray( v21 ) );
+    key = keyManager.generateEncryptionKeyRoot( CryptUtil.bigIntegerToArray( v21 ) );
 
-    byte[] chash1 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( staticKey, usernameHash, CryptUtil.bigIntegerToByteArray( session ), CryptUtil.bigIntegerToByteArray( exchangeKey ), CryptUtil.bigIntegerToByteArray( getKeyExchangeServer() ), key ) );
-    byte[] chash2 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( CryptUtil.bigIntegerToByteArray( exchangeKey ), chash1, key ) );
+    byte[] chash1 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( staticKey, usernameHash, CryptUtil.bigIntegerToArray( session ), CryptUtil.bigIntegerToArray( exchangeKey ), CryptUtil.bigIntegerToArray( getKeyExchangeServer() ), key ) );
+    byte[] chash2 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( CryptUtil.bigIntegerToArray( exchangeKey ), chash1, key ) );
 //    key = keyManager.generate256BytesKey( key );
 
     return new byte[][] { chash1, chash2 };
@@ -114,7 +114,7 @@ public class BNSKeyExchange extends AbstractKeyExchange
   public void generateKey( Mode mode, byte[] keyExchange )
   {
     byte[][] checkHash = null;
-    BigInteger exchange = new BigInteger( keyExchange );
+    BigInteger exchange = new BigInteger( 1, keyExchange );
     switch( mode )
     {
       case CLIENT:
@@ -133,16 +133,16 @@ public class BNSKeyExchange extends AbstractKeyExchange
     switch( mode )
     {
       case CLIENT:
-        return CryptUtil.bigIntegerToByteArray( getKeyExchangeClient() );
+        return CryptUtil.bigIntegerToArray( getKeyExchangeClient() );
       case SERVER:
-        return CryptUtil.bigIntegerToByteArray( getKeyExchangeServer() );
+        return CryptUtil.bigIntegerToArray( getKeyExchangeServer() );
     }
     return new byte[ 0 ];
   }
 
   public byte[] getSessionBytes()
   {
-    return CryptUtil.bigIntegerToByteArray( session );
+    return CryptUtil.bigIntegerToArray( session );
   }
 
   public String getUser()

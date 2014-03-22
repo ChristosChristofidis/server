@@ -37,7 +37,7 @@ public class CryptUtil
     return new String( hexChars );
   }
 
-  public static byte[] bigIntegerToByteArray( BigInteger i )
+  public static byte[] bigIntegerToArray( BigInteger i )
   {
     byte[] array = i.toByteArray();
     if( array[ 0 ] == 0 )
