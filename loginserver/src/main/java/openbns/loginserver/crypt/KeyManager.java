@@ -43,9 +43,9 @@ public class KeyManager
 
       byte[] hash = digest.digest();
       byte[] reversed = reverseIntegerArray( hash );
-      String k = CryptUtil.hexToString( reversed );
+//      String k = CryptUtil.hexToString( reversed );
 
-      return new BigInteger( k, 16 );
+      return new BigInteger( 1, reversed );
     }
     catch( Exception e )
     {
@@ -56,21 +56,16 @@ public class KeyManager
 
   private byte[] reverseIntegerArray( byte[] array ) throws IOException
   {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream( array.length );
-    DataOutputStream dos = new DataOutputStream( bos );
-    DataInputStream dis = new DataInputStream( new ByteArrayInputStream( array ) );
+    byte[] res = new byte[ array.length ];
 
-    while( dis.available() > 0 )
+    for( int i = 0; i < array.length; i += 4 )
     {
-      int i = dis.readInt();
-      dos.writeInt( Integer.reverseBytes( i ) );
+      res[ i ] = array[ i + 3 ];
+      res[ i + 1 ] = array[ i + 2 ];
+      res[ i + 2 ] = array[ i + 1 ];
+      res[ i + 3 ] = array[ i ];
     }
-
-    dis.close();
-    dos.close();
-    bos.close();
-
-    return bos.toByteArray();
+    return res;
   }
 
   public byte[] generateEncryptionKeyRoot( byte[] src )
