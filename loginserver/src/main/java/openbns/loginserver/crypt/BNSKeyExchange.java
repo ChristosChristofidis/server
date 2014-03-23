@@ -26,7 +26,7 @@ public class BNSKeyExchange extends AbstractKeyExchange
   private BigInteger exchangeKey = two;
   private BigInteger exchangeKeyServer;
 
-  private BigInteger session = new BigInteger( CryptUtil.hexToString( rnd.generateSeed( 8 ) ), 16 );
+  private BigInteger session = new BigInteger( 1, rnd.generateSeed( 8 ) );
   private byte[] passwordHash, usernameHash;
   private String user, authentication;
 
@@ -86,10 +86,10 @@ public class BNSKeyExchange extends AbstractKeyExchange
 
     BigInteger hash2 = keyManager.generateAIIKey( CryptUtil.bigIntegerToArray( session ), passwordHash );
 
-    BigInteger v27 = new BigInteger( CryptUtil.bigIntegerToArray( exchangeKey ) );
+    BigInteger v27 = new BigInteger( exchangeKey.toByteArray() );
 
     //BigInteger v21 = (this.GetKeyExchange().modPow((hash1 * hash2), N) * v27.modPow(privateKey, N)) % N;
-    BigInteger v21 = ((getKeyExchange().modPow( (hash1.multiply( hash2 )), N )).multiply( v27.modPow( privateKey, N ) )).mod( N );
+    BigInteger v21 = getKeyExchange().modPow( hash1.multiply( hash2 ), N ).multiply( v27.modPow( privateKey, N ) ).mod( N );
     key = keyManager.generateEncryptionKeyRoot( CryptUtil.bigIntegerToArray( v21 ) );
 
     byte[] chash1 = CryptUtil.sha256bytes( CryptUtil.mergeArrays( staticKey, usernameHash, CryptUtil.bigIntegerToArray( session ), CryptUtil.bigIntegerToArray( exchangeKey ), CryptUtil.bigIntegerToArray( getKeyExchangeServer() ), key ) );
@@ -107,14 +107,14 @@ public class BNSKeyExchange extends AbstractKeyExchange
     String s_time = String.valueOf( ticks );
     byte[] b_time = s_time.getBytes();
 
-    privateKey = new BigInteger( CryptUtil.sha256( b_time ), 16 );
+    privateKey = new BigInteger( 1, CryptUtil.sha256bytes( b_time ) );
   }
 
   @Override
   public void generateKey( Mode mode, byte[] keyExchange )
   {
     byte[][] checkHash = null;
-    BigInteger exchange = new BigInteger( 1, keyExchange );
+    BigInteger exchange = new BigInteger( keyExchange );
     switch( mode )
     {
       case CLIENT:
@@ -137,7 +137,7 @@ public class BNSKeyExchange extends AbstractKeyExchange
       case SERVER:
         return CryptUtil.bigIntegerToArray( getKeyExchangeServer() );
     }
-    return new byte[ 0 ];
+    throw new IllegalArgumentException();
   }
 
   public byte[] getSessionBytes()
@@ -155,11 +155,6 @@ public class BNSKeyExchange extends AbstractKeyExchange
     this.user = user;
   }
 
-  public byte[] getPasswordHash()
-  {
-    return passwordHash;
-  }
-
   public void setPasswordHash( byte[] passwordHash )
   {
     this.passwordHash = passwordHash;
@@ -168,10 +163,5 @@ public class BNSKeyExchange extends AbstractKeyExchange
   public String getAuthentication()
   {
     return authentication;
-  }
-
-  public void setAuthentication( String authentication )
-  {
-    this.authentication = authentication;
   }
 }

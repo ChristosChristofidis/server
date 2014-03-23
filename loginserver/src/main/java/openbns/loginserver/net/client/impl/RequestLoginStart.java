@@ -52,12 +52,11 @@ public class RequestLoginStart extends AbstractRequestPacket
       byte[] sk = getHandler().getKeyExchange().getSessionBytes();
 
       ByteBuffer buffer = ByteBuffer.allocate( bk.length + sk.length + 8 );
-      buffer.order( ByteOrder.LITTLE_ENDIAN );
 
       buffer.clear();
-      buffer.putInt( sk.length );
+      buffer.putInt( Integer.reverseBytes( sk.length ) );
       buffer.put( sk );
-      buffer.putInt( bk.length );
+      buffer.putInt( Integer.reverseBytes( bk.length ) );
       buffer.put( bk );
       buffer.flip();
 

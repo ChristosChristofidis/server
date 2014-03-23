@@ -43,9 +43,7 @@ public class KeyManager
 
       byte[] hash = digest.digest();
       byte[] reversed = reverseIntegerArray( hash );
-//      String k = CryptUtil.hexToString( reversed );
-
-      return new BigInteger( 1, reversed );
+      return new BigInteger( 1,  reversed );
     }
     catch( Exception e )
     {

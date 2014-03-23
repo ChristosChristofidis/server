@@ -50,8 +50,16 @@ public class RequestKeyData extends AbstractRequestPacket
     try
     {
       handler.getKeyExchange().generateKey( AbstractKeyExchange.Mode.SERVER, exchangeKey );
+
+      String checkHashStr = CryptUtil.base64( checkHash );
       String hash = handler.getKeyExchange().getAuthentication();
 
+      String[] args = hash.split( "," );
+
+      if( checkHashStr.equals( args[ 0 ] ) )
+      {
+        System.out.println( "Authorisation successful" );
+      }
       System.out.println( hash );
     }
     catch( Exception e )
